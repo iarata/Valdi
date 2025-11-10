@@ -26,7 +26,7 @@ class DescriptorDatabase;
 
 class ProtobufMessageFactory : public ValdiObject {
 public:
-    ProtobufMessageFactory();
+    explicit ProtobufMessageFactory(bool skipProtoIndex);
     ~ProtobufMessageFactory() override;
 
     struct NamespaceEntry {
@@ -48,7 +48,7 @@ public:
                       std::string_view protoFileContent,
                       ExceptionTracker& exceptionTracker);
 
-    std::vector<Protobuf::FullyQualifiedName> getDescriptorNames() const;
+    std::vector<std::string> getDescriptorNames() const;
 
     const google::protobuf::Descriptor* getDescriptorAtIndex(size_t index, ExceptionTracker& exceptionTracker);
 

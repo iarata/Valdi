@@ -7,9 +7,9 @@ import { now } from './cpp';
 
 import { load } from 'valdi_protobuf/src/ProtobufBuilder';
 
-export function runProtoImport(): number {
+export function runProtoImport(src: string): number {
   const start = now();
-  load('benchmark/src/proto.protodecl');
+  load(src);
   const end = now();
   return end - start;
 }
@@ -19,23 +19,27 @@ export interface ComponentContext {}
 
 interface State {
   importLatency: number;
+  importLatencyNoIndex: number;
 }
 
 @NavigationPage(module)
 export class ProtoImportTest extends NavigationPageStatefulComponent<ViewModel, ComponentContext> {
   state: State = {
     importLatency: 0,
+    importLatencyNoIndex: 0,
   };
 
   onCreate() {
-    const importLatency = runProtoImport();
-    this.setState({ importLatency: importLatency });
+    const importLatency = runProtoImport('benchmark/src/proto.protodecl');
+    const importLatencyNoIndex = runProtoImport('benchmark/src/proto_noidx.protodecl');
+    this.setState({ importLatency: importLatency, importLatencyNoIndex: importLatencyNoIndex });
   }
 
   onRender(): void {
     <view backgroundColor="white" flexDirection="column">
       <label marginTop={20} style={styles.text} value="1000 messages and 200 enums imported in"></label>
       <label style={styles.text} value={`${this.state.importLatency.toFixed(2)} ms`} />
+      <label style={styles.text} value={`${this.state.importLatencyNoIndex.toFixed(2)} ms`} />
     </view>;
   }
 }

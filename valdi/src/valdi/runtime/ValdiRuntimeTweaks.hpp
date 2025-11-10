@@ -30,6 +30,7 @@ public:
     bool disableAnimationRemoveOnCompleteIos() const;
     bool shouldNudgeJSThread() const;
     bool disablePersistentStoreEncryption() const;
+    bool skipProtoIndex() const;
 
 private:
     Shared<ITweakValueProvider> _tweakValueProvider;

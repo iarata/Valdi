@@ -15,12 +15,24 @@ cc_library(
     strip_include_prefix = "src",
     visibility = ["//visibility:public"],
     deps = [
+        ":index_proto",
         "//libs/utils:utils_core_cc",
         "//libs/utils:utils_encoding_cc",
         "//valdi_core:valdi_core_cc",
         "@protobuf_cpp//:protobuf",
     ],
     alwayslink = False,
+)
+
+cc_library(
+    name = "index_proto",
+    srcs = ["src/valdi_protobuf/protos/DescriptorIndex.pb.cc"],
+    hdrs = ["src/valdi_protobuf/protos/DescriptorIndex.pb.h"],
+    copts = COMPILER_FLAGS,
+    strip_include_prefix = "src",
+    deps = [
+        "@protobuf_cpp//:protobuf",
+    ],
 )
 
 cc_library(

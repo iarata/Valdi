@@ -66,18 +66,15 @@ static void registerModuleFunction(IJavaScriptContext& jsContext,
 }
 
 void ProtobufModuleFactory::preloadProtoModule(const Ref<ResourceManager>& resourcesManager,
-                                               const Ref<DispatchQueue>& workerQueue,
                                                const StringBox& modulePath,
                                                ILogger& logger) {
-    workerQueue->async([resourcesManager, modulePath, logger = strongSmallRef(&logger)]() {
-        VALDI_TRACE("Protobuf.preloadMessages");
-        SimpleExceptionTracker exceptionTracker;
-        ProtobufModule::getMessageFactoryAtPath(*resourcesManager, modulePath, exceptionTracker);
-        if (!exceptionTracker) {
-            auto error = exceptionTracker.extractError();
-            VALDI_ERROR(*logger, "Failed to preload proto module at '{}': {}", modulePath, error);
-        }
-    });
+    VALDI_TRACE("Protobuf.preloadMessages");
+    SimpleExceptionTracker exceptionTracker;
+    ProtobufModule::getMessageFactoryAtPath(*resourcesManager, modulePath, exceptionTracker);
+    if (!exceptionTracker) {
+        auto error = exceptionTracker.extractError();
+        VALDI_ERROR(logger, "Failed to preload proto module at '{}': {}", modulePath, error);
+    }
 }
 
 StringBox ProtobufModuleFactory::getModulePath() const {

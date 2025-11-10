@@ -4,14 +4,10 @@
 
 #include "valdi_core/cpp/Utils/Bytes.hpp"
 #include "valdi_core/cpp/Utils/FlatMap.hpp"
-#include "valdi_core/cpp/Utils/StringBox.hpp"
 #include "valdi_core/cpp/Utils/Value.hpp"
-
-#include "valdi_protobuf/FullyQualifiedName.hpp"
-
+#include "valdi_protobuf/protos/DescriptorIndex.pb.h"
 #include <google/protobuf/descriptor.h>
 #include <google/protobuf/descriptor_database.h>
-
 #include <vector>
 
 namespace Valdi {
@@ -20,11 +16,7 @@ class ExceptionTracker;
 
 namespace Valdi::Protobuf {
 
-class FullyQualifiedName;
-class Message;
-class Raw;
-class Field;
-class MessagePool;
+class DescriptorDatabaseBuilder;
 
 /**
  * DescriptorDatabase is a memory efficient implementation of google::protobuf::DescriptorDatabase
@@ -34,30 +26,9 @@ class MessagePool;
  */
 class DescriptorDatabase : public google::protobuf::DescriptorDatabase {
 public:
-    DescriptorDatabase();
-    ~DescriptorDatabase() override;
-
-    struct FileEntry {
-        StringBox fileName;
-        const void* data = nullptr;
-        size_t length = 0;
-    };
-
-    struct Symbol {
-        FullyQualifiedName fullName;
-        size_t fileIndex = 0;
-        const google::protobuf::Descriptor* descriptor = nullptr;
-    };
-
-    struct Package {
-        FullyQualifiedName fullName;
-        std::vector<size_t> symbolIndexes;
-        std::vector<size_t> nestedPackageIndexes;
-    };
+    explicit DescriptorDatabase(bool skipProtoIndex);
 
     bool addFileDescriptorSet(const BytesView& data, ExceptionTracker& exceptionTracker);
-
-    bool addFileDescriptor(const BytesView& data, ExceptionTracker& exceptionTracker);
 
     bool parseAndAddFileDescriptorSet(const std::string& filename,
                                       std::string_view protoFileContent,
@@ -75,64 +46,42 @@ public:
 
     bool FindAllFileNames(std::vector<std::string>* output) final;
 
-    std::vector<FullyQualifiedName> getAllSymbolNames() const;
+    std::vector<std::string> getAllSymbolNames() const;
 
     size_t getSymbolsSize() const;
 
     const google::protobuf::Descriptor* getDescriptorOfSymbolAtIndex(size_t index) const;
 
-    const FullyQualifiedName& getSymbolNameAtIndex(size_t index) const;
+    const std::string& getSymbolNameAtIndex(size_t index) const;
 
     void setDescriptorOfSymbolAtIndex(size_t index, const google::protobuf::Descriptor* descriptor);
 
     size_t getPackagesSize() const;
 
-    const Package& getPackageAtIndex(size_t index) const;
+    const DescriptorIndex::Package& getPackageAtIndex(size_t index) const;
 
-    const Package& getRootPackage() const;
+    const DescriptorIndex::Package& getRootPackage() const;
 
-    std::optional<size_t> getSymbolIndexForName(const StringBox& name);
+    std::optional<size_t> getSymbolIndexForName(std::string_view name);
 
     Value toDebugJSON() const;
 
 private:
     std::vector<BytesView> _retainedBuffers;
-    std::vector<FileEntry> _files;
-    std::vector<Symbol> _symbols;
-    std::vector<Package> _packages;
-    FlatMap<StringBox, size_t> _fileIndexByName;
-    FlatMap<FullyQualifiedName, size_t> _symbolIndexByName;
-    FlatMap<FullyQualifiedName, size_t> _packageIndexByName;
+    DescriptorIndex::DescriptorIndex _index;
+    std::vector<const google::protobuf::Descriptor*> _descriptors;
+    FlatMap<std::string, size_t> _fileIndexByName;
+    FlatMap<std::string, size_t> _symbolIndexByName;
+    FlatMap<std::string, size_t> _packageIndexByName;
+    bool _prebuiltIndexLoaded = false;
+    std::shared_ptr<DescriptorDatabaseBuilder> _builder;
+    const bool _skipProtoIndex;
 
-    bool addFileDescriptorInner(MessagePool& messagePool,
-                                const Byte* data,
-                                size_t length,
-                                ExceptionTracker& exceptionTracker);
-
+    void finaliseIndex();
     bool copyProtoOfFile(size_t fileIndex, google::protobuf::FileDescriptorProto* output);
-
-    bool addDescriptor(size_t fileIndex,
-                       size_t packageIndex,
-                       const FullyQualifiedName& packageName,
-                       MessagePool& messagePool,
-                       const Protobuf::Field& field,
-                       ExceptionTracker& exceptionTracker);
-
-    bool addSymbol(size_t fileIndex,
-                   size_t packageIndex,
-                   const FullyQualifiedName& name,
-                   ExceptionTracker& exceptionTracker);
-
-    bool addSymbolFromField(size_t fileIndex,
-                            size_t packageIndex,
-                            FullyQualifiedName& outputName,
-                            Message& outMessage,
-                            const Protobuf::Field& field,
-                            ExceptionTracker& exceptionTracker);
-
-    size_t getOrCreatePackageIndex(const FullyQualifiedName& name);
-
-    Value packageToDebugJSON(const Package& package) const;
+    Value packageToDebugJSON(const DescriptorIndex::Package& package) const;
+    bool addIndexedFileDescriptorSet(const BytesView& data, ExceptionTracker& exceptionTracker);
+    bool addFileDescriptorSetWithBuilder(const BytesView& data, ExceptionTracker& exceptionTracker);
 };
 
 } // namespace Valdi::Protobuf

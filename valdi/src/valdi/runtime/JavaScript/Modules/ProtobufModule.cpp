@@ -11,6 +11,7 @@
 #include "valdi/runtime/JavaScript/Modules/ProtobufArena.hpp"
 #include "valdi/runtime/JavaScript/Modules/ProtobufMessageFactory.hpp"
 #include "valdi/runtime/Resources/ResourceManager.hpp"
+#include "valdi/runtime/ValdiRuntimeTweaks.hpp"
 
 #include "valdi_core/cpp/JavaScript/JavaScriptPathResolver.hpp"
 #include "valdi_core/cpp/Utils/Format.hpp"
@@ -19,8 +20,6 @@
 #include "valdi_protobuf/Message.hpp"
 
 #include "utils/debugging/Assert.hpp"
-
-#include <iostream>
 
 namespace Valdi {
 
@@ -994,11 +993,8 @@ JSValueRef ProtobufModule::doLoadMessagesFromFactory(const Ref<ProtobufMessageFa
     CHECK_CALL_CONTEXT(callContext);
 
     size_t messageIndex = 0;
-    std::string tmp;
     for (const auto& descriptorName : descriptorNames) {
-        tmp.clear();
-        descriptorName.toString(tmp);
-        auto messageFullName = jsContext.newStringUTF8(tmp, callContext.getExceptionTracker());
+        auto messageFullName = jsContext.newStringUTF8(descriptorName, callContext.getExceptionTracker());
         CHECK_CALL_CONTEXT(callContext);
 
         jsContext.setObjectPropertyIndex(
@@ -1059,9 +1055,10 @@ Ref<ProtobufMessageFactory> ProtobufModule::getMessageFactoryAtPath(ResourceMana
 
     auto messageFactory = castOrNull<ProtobufMessageFactory>(entry.processed);
     if (messageFactory == nullptr) {
+        bool skipProtoIndex = resourceManager.getRuntimeTweaks()->skipProtoIndex();
         VALDI_TRACE("Protobuf.initializeMessageFactory");
         // Step 1: We parse the protobuf definitions and load them inside a message factory
-        messageFactory = Valdi::makeShared<ProtobufMessageFactory>();
+        messageFactory = Valdi::makeShared<ProtobufMessageFactory>(skipProtoIndex);
         messageFactory->load(entry.raw, exceptionTracker);
         if (!exceptionTracker) {
             return nullptr;
@@ -1091,7 +1088,8 @@ JSValueRef ProtobufModule::loadMessagesFromProtoFileContent(JSFunctionNativeCall
         auto protoFileContent = callContext.getParameterAsStaticString(1);
         CHECK_CALL_CONTEXT(callContext);
         auto utf8Storage = protoFileContent->utf8Storage();
-        auto messageFactory = Valdi::makeShared<ProtobufMessageFactory>();
+        bool skipProtoIndex = _resourcesManager.getRuntimeTweaks()->skipProtoIndex();
+        auto messageFactory = Valdi::makeShared<ProtobufMessageFactory>(skipProtoIndex);
 
         if (!messageFactory->parseAndLoad(filename, utf8Storage.toStringView(), callContext.getExceptionTracker())) {
             return JSValueRef();

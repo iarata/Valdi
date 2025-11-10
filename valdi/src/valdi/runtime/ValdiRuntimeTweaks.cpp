@@ -100,4 +100,8 @@ bool ValdiRuntimeTweaks::disableAnimationRemoveOnCompleteIos() const {
     return getConfigKey("VALDI_DISABLE_ANIMATION_REMOVE_ON_COMPLETE_IOS");
 }
 
+bool ValdiRuntimeTweaks::skipProtoIndex() const {
+    return getConfigKey("VALDI_PROTO_SKIP_INDEX");
+}
+
 } // namespace Valdi

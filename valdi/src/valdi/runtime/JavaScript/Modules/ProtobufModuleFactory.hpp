@@ -24,7 +24,6 @@ public:
     ~ProtobufModuleFactory() override;
 
     static void preloadProtoModule(const Ref<ResourceManager>& resourcesManager,
-                                   const Ref<DispatchQueue>& workerQueue,
                                    const StringBox& modulePath,
                                    ILogger& logger);
 

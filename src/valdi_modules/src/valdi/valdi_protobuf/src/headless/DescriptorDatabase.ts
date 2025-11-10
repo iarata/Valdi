@@ -219,11 +219,10 @@ export class DescriptorDatabase {
     };
   }
 
-
   private addDescriptor(
     parentNamespace: INamespace,
     parentPackage: FullyQualifiedName,
-    descriptorProto: DescriptorProto
+    descriptorProto: DescriptorProto,
   ): void {
     const name = descriptorProto.name;
     const childPackage = new FullyQualifiedName(parentPackage, name);
@@ -294,8 +293,20 @@ export class DescriptorDatabase {
     this.allDescriptors.push({ name: childPackage, isEnum: true });
   }
 
-  addFileDescriptorSet(encodedFileDescriptorSet: Uint8Array): void {
-    const fileDescriptorSet = parseFileDescriptorSet(encodedFileDescriptorSet);
+  getDescriptorSetFromBuffer(buffer: Uint8Array): Uint8Array {
+    const tag = String.fromCharCode(...buffer.subarray(0, 8));
+    if (tag != 'VALDIPRO') {
+      // no tag, the entire buffer is a file descriptor set
+      return buffer;
+    }
+    // found tag, skip the tag (8 bytes), index size (4 bytes), and the index
+    const view = new DataView(buffer.buffer, buffer.byteOffset, buffer.byteLength);
+    const indexSize = view.getUint32(8, true);
+    return buffer.subarray(12 + indexSize);
+  }
+
+  addFileDescriptorSet(buffer: Uint8Array): void {
+    const fileDescriptorSet = parseFileDescriptorSet(this.getDescriptorSetFromBuffer(buffer));
 
     if (fileDescriptorSet.file) {
       for (const file of fileDescriptorSet.file) {

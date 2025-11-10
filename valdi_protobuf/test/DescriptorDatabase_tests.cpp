@@ -64,7 +64,7 @@ message MyOtherMessage {
 
 TEST(DescriptorDatabase, canFindFileByName) {
     SimpleExceptionTracker exceptionTracker;
-    Protobuf::DescriptorDatabase database;
+    Protobuf::DescriptorDatabase database(false);
 
     ASSERT_TRUE(registerProtoInDatabase(database, exceptionTracker)) << exceptionTracker.extractError();
 
@@ -85,7 +85,7 @@ TEST(DescriptorDatabase, canFindFileByName) {
 
 TEST(DescriptorDatabase, canFindFileContainingSymbol) {
     SimpleExceptionTracker exceptionTracker;
-    Protobuf::DescriptorDatabase database;
+    Protobuf::DescriptorDatabase database(false);
 
     ASSERT_TRUE(registerProtoInDatabase(database, exceptionTracker)) << exceptionTracker.extractError();
 
@@ -103,7 +103,7 @@ TEST(DescriptorDatabase, canFindFileContainingSymbol) {
 
 TEST(DescriptorDatabase, canFindAllFileNames) {
     SimpleExceptionTracker exceptionTracker;
-    Protobuf::DescriptorDatabase database;
+    Protobuf::DescriptorDatabase database(false);
 
     ASSERT_TRUE(registerProtoInDatabase(database, exceptionTracker)) << exceptionTracker.extractError();
 
@@ -115,16 +115,11 @@ TEST(DescriptorDatabase, canFindAllFileNames) {
 
 TEST(DescriptorDatabase, canRetrieveSymbolNames) {
     SimpleExceptionTracker exceptionTracker;
-    Protobuf::DescriptorDatabase database;
+    Protobuf::DescriptorDatabase database(false);
 
     ASSERT_TRUE(registerProtoInDatabase(database, exceptionTracker)) << exceptionTracker.extractError();
 
-    auto symbolNames = database.getAllSymbolNames();
-
-    std::vector<std::string> symbolNameStrings;
-    for (const auto& symbolName : symbolNames) {
-        symbolNameStrings.emplace_back(symbolName.toString());
-    }
+    std::vector<std::string> symbolNameStrings = database.getAllSymbolNames();
 
     std::sort(symbolNameStrings.begin(), symbolNameStrings.end());
 
@@ -143,7 +138,7 @@ TEST(DescriptorDatabase, canRetrieveSymbolNames) {
 
 TEST(DescriptorDatabase, canRetrievePackages) {
     SimpleExceptionTracker exceptionTracker;
-    Protobuf::DescriptorDatabase database;
+    Protobuf::DescriptorDatabase database(false);
 
     ASSERT_TRUE(registerProtoInDatabase(database, exceptionTracker)) << exceptionTracker.extractError();
 

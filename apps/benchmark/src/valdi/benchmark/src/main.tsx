@@ -19,8 +19,10 @@ const tests = [
   {
     name: 'Proto Import',
     body: () => {
-      const importTime = runProtoImport();
-      print(`Proto imported in ${importTime} ms`);
+      const importTime = runProtoImport('benchmark/src/proto.protodecl');
+      const importTimeNoIndex = runProtoImport('benchmark/src/proto_noidx.protodecl');
+      print(`Proto (indexed) imported in ${importTime} ms`);
+      print(`Proto (noindex) imported in ${importTimeNoIndex} ms`);
     },
   },
 ];
