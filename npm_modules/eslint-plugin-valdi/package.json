@@ -1,7 +1,12 @@
 {
   "name": "@snap/eslint-plugin-valdi",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "ESLint rules for the Valdi project",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Snapchat/Valdi.git",
+    "directory": "npm_modules/eslint-plugin-valdi"
+  },
   "publishConfig": { "access": "public" },
   "main": "dist/index.js",
   "scripts": {
@@ -12,7 +17,7 @@
     "preinstall": "npm run build"
   },
   "author": "elee2@snapchat.com",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "@typescript-eslint/eslint-plugin": "^6.21.0",
     "@typescript-eslint/parser": "^6.21.0",

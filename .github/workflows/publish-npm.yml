@@ -71,9 +71,7 @@ jobs:
         run: npm run build
 
       - name: Publish @snap/valdi to npm
-        env:
-          NPM_CONFIG_PROVENANCE: 'true'
-        run: npm publish --access public
+        run: npm publish --provenance --access public
 
   publish-eslint-plugin:
     needs: detect-changes
@@ -107,7 +105,5 @@ jobs:
         run: npm run build
 
       - name: Publish @snap/eslint-plugin-valdi to npm
-        env:
-          NPM_CONFIG_PROVENANCE: 'true'
-        run: npm publish --access public
+        run: npm publish --provenance --access public
 

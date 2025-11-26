@@ -1,8 +1,13 @@
 {
   "name": "@snap/valdi",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Valdi CLI tools for developers",
-  "license": "ISC",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Snapchat/Valdi.git",
+    "directory": "npm_modules/cli"
+  },
   "publishConfig": { "access": "public" },
   "bin": {
     "valdi": "dist/index.js"
